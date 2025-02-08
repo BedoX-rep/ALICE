@@ -15,11 +15,11 @@ export default function GameCard({ role, hideRole }: GameCardProps) {
     )}>
       <CardContent className="p-0">
         {!hideRole && (
-          <div className="text-4xl">
+          <div className="text-4xl flex items-center justify-center">
             {role === "hearts" && <Heart className="text-red-500" />}
             {role === "diamonds" && <Diamond className="text-blue-500" />}
             {role === "rectangle" && <Square className="text-green-500" />}
-            {role === "joker" && "🃏"}
+            {role === "joker" && <span>🃏</span>}
           </div>
         )}
       </CardContent>
