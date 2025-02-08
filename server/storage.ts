@@ -10,6 +10,7 @@ export interface IStorage {
   getPlayers(gameId: number): Promise<Player[]>;
   addPlayer(gameId: number, player: InsertPlayer): Promise<Player>;
   getPlayerByDeviceId(gameId: number, deviceId: string): Promise<Player | undefined>;
+  startGame(gameId: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -57,17 +58,17 @@ export class MemStorage implements IStorage {
         availableRoles.splice(idx, 1);
       }
     });
-    
+
     const role = availableRoles[Math.floor(Math.random() * availableRoles.length)];
     const id = this.currentPlayerId++;
-    
+
     const newPlayer: Player = {
       ...player,
       id,
       role,
       gameId
     };
-    
+
     this.players.set(id, newPlayer);
     return newPlayer;
   }
@@ -76,6 +77,23 @@ export class MemStorage implements IStorage {
     return Array.from(this.players.values()).find(
       p => p.gameId === gameId && p.deviceId === deviceId
     );
+  }
+
+  async startGame(gameId: number): Promise<void> {
+    const game = await this.getGame(gameId);
+    if (!game) return;
+
+    // Assign random roles to all players
+    const players = await this.getPlayers(gameId);
+    const roles = [...ROLES];
+    for (const player of players) {
+      const randomIndex = Math.floor(Math.random() * roles.length);
+      const role = roles.splice(randomIndex, 1)[0];
+      this.players.set(player.id, { ...player, role });
+    }
+
+    // Mark game as started
+    this.games.set(gameId, { ...game, started: true });
   }
 }
 

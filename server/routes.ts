@@ -53,6 +53,16 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.post("/api/games/:code/start", async (req, res) => {
+    const game = await storage.getGameByCode(req.params.code);
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+
+    await storage.startGame(game.id);
+    res.json({ success: true });
+  });
+
   app.get("/api/games/:code/players", async (req, res) => {
     const game = await storage.getGameByCode(req.params.code);
     if (!game) {
