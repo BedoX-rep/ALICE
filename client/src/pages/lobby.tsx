@@ -95,10 +95,10 @@ export default function Lobby() {
           />
 
           {isCreator && (
-            <div className="space-y-4 mt-6">
+            <div className="flex gap-4 mt-6">
               {!game.started && players.length >= 2 && (
                 <Button 
-                  className="w-full"
+                  className="flex-1"
                   onClick={() => startGame.mutate()}
                   disabled={startGame.isPending}
                 >
@@ -108,7 +108,7 @@ export default function Lobby() {
 
               {game.started && (
                 <Button 
-                  className="w-full"
+                  className="flex-1"
                   onClick={() => nextRound.mutate()}
                   disabled={nextRound.isPending}
                 >
