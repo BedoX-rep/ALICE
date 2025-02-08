@@ -17,6 +17,7 @@ export default function PlayerList({ players, currentPlayerId }: PlayerListProps
           <GameCard 
             role={player.role}
             hideRole={player.id === currentPlayerId}
+            disguisedAs={player.disguisedAs}
           />
           <div>
             <h3 className="font-semibold">{player.name}</h3>

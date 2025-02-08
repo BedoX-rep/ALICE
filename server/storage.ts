@@ -2,6 +2,7 @@ import { nanoid } from "nanoid";
 import { type Game, type InsertGame, type Player, type InsertPlayer, type Role } from "@shared/schema";
 
 const ROLES: Role[] = ["hearts", "diamonds", "rectangle", "joker"];
+const DISGUISE_ROLES: Role[] = ["hearts", "diamonds", "rectangle"]; // Joker can only disguise as these
 
 export interface IStorage {
   createGame(): Promise<Game>;
@@ -66,7 +67,8 @@ export class MemStorage implements IStorage {
       ...player,
       id,
       role,
-      gameId
+      gameId,
+      disguisedAs: null
     };
 
     this.players.set(id, newPlayer);
@@ -89,7 +91,13 @@ export class MemStorage implements IStorage {
     for (const player of players) {
       const randomIndex = Math.floor(Math.random() * roles.length);
       const role = roles.splice(randomIndex, 1)[0];
-      this.players.set(player.id, { ...player, role });
+
+      // If this player gets the joker, assign a random disguise
+      const disguisedAs = role === "joker" 
+        ? DISGUISE_ROLES[Math.floor(Math.random() * DISGUISE_ROLES.length)]
+        : null;
+
+      this.players.set(player.id, { ...player, role, disguisedAs });
     }
 
     // Mark game as started

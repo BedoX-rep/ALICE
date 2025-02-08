@@ -16,6 +16,7 @@ export const players = pgTable("players", {
   deviceId: text("device_id").notNull(),
   name: text("name").notNull(),
   role: text("role").notNull(),
+  disguisedAs: text("disguised_as"),
 });
 
 export const insertGameSchema = createInsertSchema(games).omit({ 
@@ -25,7 +26,8 @@ export const insertGameSchema = createInsertSchema(games).omit({
 
 export const insertPlayerSchema = createInsertSchema(players).omit({
   id: true,
-  role: true
+  role: true,
+  disguisedAs: true
 });
 
 export const joinGameSchema = z.object({
