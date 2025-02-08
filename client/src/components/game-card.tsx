@@ -8,18 +8,21 @@ type GameCardProps = {
 };
 
 export default function GameCard({ role, hideRole }: GameCardProps) {
+  const isJoker = role === "joker";
+  const shouldHide = hideRole && !isJoker;
+
   return (
     <Card className={cn(
       "w-24 h-32 flex items-center justify-center",
-      hideRole && "bg-muted"
+      shouldHide && "bg-muted"
     )}>
       <CardContent className="p-0">
-        {!hideRole && (
+        {!shouldHide && (
           <div className="text-4xl flex items-center justify-center">
             {role === "hearts" && <Heart className="text-red-500" />}
             {role === "diamonds" && <Diamond className="text-blue-500" />}
             {role === "rectangle" && <Square className="text-green-500" />}
-            {role === "joker" && <span>🃏</span>}
+            {isJoker && <span>🃏</span>}
           </div>
         )}
       </CardContent>
