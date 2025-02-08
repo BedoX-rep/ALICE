@@ -39,6 +39,19 @@ export default function Lobby() {
     }
   });
 
+  const nextRound = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", `/api/games/${gameCode}/next-round`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/games/${gameCode}/players`] });
+      toast({
+        title: "Next Round Started",
+        description: "Roles have been shuffled!"
+      });
+    }
+  });
+
   // Auto-join game for creator
   useEffect(() => {
     if (game && deviceId && (!players || !players.find(p => p.deviceId === deviceId))) {
@@ -81,14 +94,28 @@ export default function Lobby() {
             currentPlayerId={currentPlayer.id}
           />
 
-          {isCreator && !game.started && players.length >= 2 && (
-            <Button 
-              className="w-full mt-6"
-              onClick={() => startGame.mutate()}
-              disabled={startGame.isPending}
-            >
-              {startGame.isPending ? "Starting Game..." : "Start Game"}
-            </Button>
+          {isCreator && (
+            <div className="space-y-4 mt-6">
+              {!game.started && players.length >= 2 && (
+                <Button 
+                  className="w-full"
+                  onClick={() => startGame.mutate()}
+                  disabled={startGame.isPending}
+                >
+                  {startGame.isPending ? "Starting Game..." : "Start Game"}
+                </Button>
+              )}
+
+              {game.started && (
+                <Button 
+                  className="w-full"
+                  onClick={() => nextRound.mutate()}
+                  disabled={nextRound.isPending}
+                >
+                  {nextRound.isPending ? "Starting Next Round..." : "Next Round"}
+                </Button>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>

@@ -73,6 +73,20 @@ export function registerRoutes(app: Express): Server {
     res.json(players);
   });
 
+  app.post("/api/games/:code/next-round", async (req, res) => {
+    const game = await storage.getGameByCode(req.params.code);
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+
+    if (!game.started) {
+      return res.status(400).json({ message: "Game hasn't started yet" });
+    }
+
+    await storage.nextRound(game.id);
+    res.json({ success: true });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

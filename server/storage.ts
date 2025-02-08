@@ -18,6 +18,7 @@ export interface IStorage {
   addPlayer(gameId: number, player: InsertPlayer): Promise<Player>;
   getPlayerByDeviceId(gameId: number, deviceId: string): Promise<Player | undefined>;
   startGame(gameId: number): Promise<void>;
+  nextRound(gameId: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -108,6 +109,30 @@ export class MemStorage implements IStorage {
 
     // Mark game as started
     this.games.set(gameId, { ...game, started: true });
+  }
+
+  async nextRound(gameId: number): Promise<void> {
+    const players = await this.getPlayers(gameId);
+
+    // Separate jokers and non-jokers
+    const jokerPlayers = players.filter(p => p.role === "joker");
+    const nonJokerPlayers = players.filter(p => p.role !== "joker");
+
+    // Get available non-joker roles
+    const availableRoles = ROLES.filter(role => role !== "joker");
+
+    // Shuffle non-joker players' roles
+    for (const player of nonJokerPlayers) {
+      const randomIndex = Math.floor(Math.random() * availableRoles.length);
+      const newRole = availableRoles.splice(randomIndex, 1)[0];
+      this.players.set(player.id, { ...player, role: newRole, disguisedAs: null });
+    }
+
+    // Reassign random disguises to jokers
+    for (const player of jokerPlayers) {
+      const newDisguise = DISGUISE_ROLES[Math.floor(Math.random() * DISGUISE_ROLES.length)];
+      this.players.set(player.id, { ...player, disguisedAs: newDisguise });
+    }
   }
 }
 
