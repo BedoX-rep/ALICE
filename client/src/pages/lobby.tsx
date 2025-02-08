@@ -12,34 +12,43 @@ export default function Lobby() {
   const { toast } = useToast();
   const gameCode = location.split("/")[2];
 
-  const { data: game } = useQuery<Game>({
-    queryKey: [`/api/games/${gameCode}`],
-  });
-
-  const { data: players } = useQuery<Player[]>({
-    queryKey: [`/api/games/${gameCode}/players`],
-    refetchInterval: 1000,
-  });
-
   const { data: deviceId } = useQuery({
     queryKey: ["deviceId"],
     queryFn: getDeviceId,
   });
 
-  const currentPlayer = players?.find(p => p.deviceId === deviceId);
+  const { data: game } = useQuery<Game>({
+    queryKey: [`/api/games/${gameCode}`],
+    enabled: !!gameCode
+  });
 
+  const { data: players } = useQuery<Player[]>({
+    queryKey: [`/api/games/${gameCode}/players`],
+    enabled: !!game,
+    refetchInterval: 1000,
+  });
+
+  // Auto-join game for creator
   useEffect(() => {
-    if (game && players && deviceId && !currentPlayer) {
-      toast({
-        title: "Error",
-        description: "You are not part of this game",
-        variant: "destructive"
+    if (game && deviceId && (!players || !players.find(p => p.deviceId === deviceId))) {
+      fetch(`/api/games/${gameCode}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: gameCode,
+          name: 'Player ' + (players?.length || 0 + 1),
+          deviceId
+        })
       });
-      setLocation("/");
     }
-  }, [game, players, deviceId, currentPlayer, toast, setLocation]);
+  }, [game, deviceId, players, gameCode]);
 
-  if (!game || !players || !deviceId || !currentPlayer) {
+  if (!game || !players || !deviceId) {
+    return null;
+  }
+
+  const currentPlayer = players.find(p => p.deviceId === deviceId);
+  if (!currentPlayer) {
     return null;
   }
 

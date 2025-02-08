@@ -22,19 +22,20 @@ export function registerRoutes(app: Express): Server {
     try {
       const data = joinGameSchema.parse(req.body);
       const game = await storage.getGameByCode(data.code);
-      
+
       if (!game) {
         return res.status(404).json({ message: "Game not found" });
-      }
-
-      const existingPlayer = await storage.getPlayerByDeviceId(game.id, data.deviceId);
-      if (existingPlayer) {
-        return res.status(400).json({ message: "Already in game" });
       }
 
       const players = await storage.getPlayers(game.id);
       if (players.length >= 4) {
         return res.status(400).json({ message: "Game is full" });
+      }
+
+      // If player already exists in game, return that player
+      const existingPlayer = await storage.getPlayerByDeviceId(game.id, data.deviceId);
+      if (existingPlayer) {
+        return res.json(existingPlayer);
       }
 
       const player = await storage.addPlayer(game.id, {
@@ -57,7 +58,7 @@ export function registerRoutes(app: Express): Server {
     if (!game) {
       return res.status(404).json({ message: "Game not found" });
     }
-    
+
     const players = await storage.getPlayers(game.id);
     res.json(players);
   });
