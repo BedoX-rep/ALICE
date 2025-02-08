@@ -28,7 +28,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       const players = await storage.getPlayers(game.id);
-      if (players.length >= 4) {
+      if (players.length >= 12) {
         return res.status(400).json({ message: "Game is full" });
       }
 

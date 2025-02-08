@@ -1,7 +1,13 @@
 import { nanoid } from "nanoid";
 import { type Game, type InsertGame, type Player, type InsertPlayer, type Role } from "@shared/schema";
 
-const ROLES: Role[] = ["hearts", "diamonds", "rectangle", "joker"];
+const ROLES: Role[] = [
+  "hearts", "hearts", "hearts",
+  "diamonds", "diamonds", "diamonds",
+  "rectangle", "rectangle", "rectangle",
+  "joker", "joker", "joker"
+];
+
 const DISGUISE_ROLES: Role[] = ["hearts", "diamonds", "rectangle"]; // Joker can only disguise as these
 
 export interface IStorage {
