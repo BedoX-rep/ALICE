@@ -5,9 +5,10 @@ import PlayerList from "@/components/player-list";
 import { type Game, type Player } from "@shared/schema";
 import { getDeviceId } from "@/lib/fingerprint";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 export default function Lobby() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const gameCode = location.split("/")[2];
 
@@ -25,17 +26,20 @@ export default function Lobby() {
     queryFn: getDeviceId,
   });
 
-  if (!game || !players || !deviceId) {
-    return null;
-  }
+  const currentPlayer = players?.find(p => p.deviceId === deviceId);
 
-  const currentPlayer = players.find(p => p.deviceId === deviceId);
-  if (!currentPlayer) {
-    toast({
-      title: "Error",
-      description: "You are not part of this game",
-      variant: "destructive"
-    });
+  useEffect(() => {
+    if (game && players && deviceId && !currentPlayer) {
+      toast({
+        title: "Error",
+        description: "You are not part of this game",
+        variant: "destructive"
+      });
+      setLocation("/");
+    }
+  }, [game, players, deviceId, currentPlayer, toast, setLocation]);
+
+  if (!game || !players || !deviceId || !currentPlayer) {
     return null;
   }
 
