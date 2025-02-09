@@ -39,10 +39,19 @@ export class MemStorage implements IStorage {
     const game: Game = {
       id,
       code: nanoid(6).toUpperCase(),
-      started: false
+      started: false,
+      jokerCount: 1
     };
     this.games.set(id, game);
     return game;
+  }
+
+  async updateJokerCount(gameId: number, count: number): Promise<Game | undefined> {
+    const game = await this.getGame(gameId);
+    if (!game) return;
+    const updatedGame = { ...game, jokerCount: count };
+    this.games.set(gameId, updatedGame);
+    return updatedGame;
   }
 
   async getGame(id: number): Promise<Game | undefined> {

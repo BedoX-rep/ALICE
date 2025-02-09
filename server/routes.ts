@@ -53,6 +53,21 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.post("/api/games/:code/joker-count", async (req, res) => {
+    const game = await storage.getGameByCode(req.params.code);
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+
+    const count = parseInt(req.body.count);
+    if (isNaN(count) || count < 1 || count > 3) {
+      return res.status(400).json({ message: "Invalid joker count" });
+    }
+
+    const updatedGame = await storage.updateJokerCount(game.id, count);
+    res.json(updatedGame);
+  });
+
   app.post("/api/games/:code/start", async (req, res) => {
     const game = await storage.getGameByCode(req.params.code);
     if (!game) {

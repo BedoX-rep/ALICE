@@ -6,7 +6,7 @@ import PlayerList from "@/components/player-list";
 import { type Game, type Player } from "@shared/schema";
 import { getDeviceId } from "@/lib/fingerprint";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function Lobby() {
@@ -19,9 +19,17 @@ export default function Lobby() {
     queryFn: getDeviceId,
   });
 
+  const [jokerCount, setJokerCount] = useState<number | "randomized" | null>(null);
+
   const { data: game } = useQuery<Game>({
     queryKey: [`/api/games/${gameCode}`],
-    enabled: !!gameCode
+    enabled: !!gameCode,
+    onSuccess: (data) => {
+      // Set initial jokerCount from the server if available
+      if (data.jokerCount !== undefined) {
+          setJokerCount(data.jokerCount);
+      }
+    }
   });
 
   const { data: players } = useQuery<Player[]>({
@@ -32,7 +40,8 @@ export default function Lobby() {
 
   const startGame = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", `/api/games/${gameCode}/start`);
+      // Include jokerCount in the request
+      await apiRequest("POST", `/api/games/${gameCode}/start`, { jokerCount });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/games/${gameCode}`] });
@@ -111,6 +120,17 @@ export default function Lobby() {
 
           {isCreator && (
             <div className="flex gap-4 mt-6">
+              {isCreator && (
+                <div>
+                  <label htmlFor="jokerCount">Joker Count:</label>
+                  <select id="jokerCount" value={jokerCount} onChange={(e) => setJokerCount(e.target.value as number | "randomized")}>
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
+                    <option value={3}>3</option>
+                    <option value={"randomized"}>Randomized</option>
+                  </select>
+                </div>
+              )}
               {!game.started && players.length >= 2 && (
                 <Button 
                   className="flex-1"
