@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "./ui/button";
@@ -15,6 +15,8 @@ interface ChatProps {
 export default function Chat({ gameCode, players }: ChatProps) {
   const [message, setMessage] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const deviceId = localStorage.getItem("deviceId");
+  const currentPlayer = players.find(p => p.deviceId === deviceId);
 
   const { data: response } = useQuery({
     queryKey: [`/api/games/${gameCode}/messages`],
@@ -30,16 +32,12 @@ export default function Chat({ gameCode, players }: ChatProps) {
 
   const sendMessage = useMutation({
     mutationFn: async () => {
-      const deviceId = localStorage.getItem("deviceId");
-      const player = players.find(p => p.deviceId === deviceId);
-      
       await apiRequest("POST", `/api/games/${gameCode}/messages`, {
         content: message,
-        playerId: player?.id,
+        playerId: currentPlayer?.id,
         toPlayerId: selectedPlayer,
         isPrivate: !!selectedPlayer
       });
-      
       setMessage("");
     },
     onSuccess: () => {
@@ -47,23 +45,33 @@ export default function Chat({ gameCode, players }: ChatProps) {
     }
   });
 
+  const shouldShowMessage = (msg: any) => {
+    if (!msg.isPrivate) return true;
+    return msg.playerId === currentPlayer?.id || msg.toPlayerId === currentPlayer?.id;
+  };
+
+  const formatMessage = (msg: any) => {
+    const sender = players.find(p => p.id === msg.playerId);
+    const recipient = players.find(p => p.id === msg.toPlayerId);
+    
+    if (msg.isPrivate) {
+      if (msg.playerId === currentPlayer?.id) {
+        return `To '${recipient?.name}': "${msg.content}"`;
+      } else {
+        return `From '${sender?.name}': "${msg.content}"`;
+      }
+    }
+    return `${sender?.name}: ${msg.content}`;
+  };
+
   return (
     <Card className="p-4">
       <ScrollArea className="h-[200px] mb-4">
-        {messages.map((msg: any) => {
-          const sender = players.find(p => p.id === msg.playerId);
-          const recipient = players.find(p => p.id === msg.toPlayerId);
-          
-          return (
-            <div key={msg.id} className="mb-2">
-              <span className="font-bold">{sender?.name}</span>
-              {msg.isPrivate && (
-                <span className="text-sm text-muted-foreground"> to {recipient?.name}</span>
-              )}
-              <span>: {msg.content}</span>
-            </div>
-          );
-        })}
+        {messages.filter(shouldShowMessage).map((msg: any) => (
+          <div key={msg.id} className="mb-2">
+            {formatMessage(msg)}
+          </div>
+        ))}
       </ScrollArea>
       
       <div className="flex gap-2">
@@ -73,7 +81,7 @@ export default function Chat({ gameCode, players }: ChatProps) {
           onChange={e => setSelectedPlayer(e.target.value || null)}
         >
           <option value="">Everyone</option>
-          {players.map(player => (
+          {players.filter(p => p.id !== currentPlayer?.id).map(player => (
             <option key={player.id} value={player.id}>
               {player.name}
             </option>
