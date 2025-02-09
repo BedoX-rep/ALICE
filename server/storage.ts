@@ -103,7 +103,6 @@ export class MemStorage implements IStorage {
 
     // Assign random roles to all players
     const players = await this.getPlayers(gameId);
-    const game = await this.getGame(gameId);
     if (!game) return;
     const roles = generateRoles(game.jokerCount);
     for (const player of players) {
