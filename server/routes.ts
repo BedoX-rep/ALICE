@@ -74,6 +74,11 @@ export function registerRoutes(app: Express): Server {
       return res.status(404).json({ message: "Game not found" });
     }
 
+    const jokerCount = parseInt(req.body.jokerCount as string);
+    if (!isNaN(jokerCount)) {
+      await storage.updateJokerCount(game.id, jokerCount);
+    }
+
     await storage.startGame(game.id);
     res.json({ success: true });
   });

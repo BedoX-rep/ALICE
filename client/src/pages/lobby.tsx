@@ -40,8 +40,12 @@ export default function Lobby() {
 
   const startGame = useMutation({
     mutationFn: async () => {
-      // Include jokerCount in the request
-      await apiRequest("POST", `/api/games/${gameCode}/start`, { jokerCount });
+      // Generate random joker count if "randomized" is selected
+      const finalJokerCount = jokerCount === "randomized" ? 
+        Math.floor(Math.random() * 3) + 1 : // Random number between 1-3
+        Number(jokerCount);
+        
+      await apiRequest("POST", `/api/games/${gameCode}/start`, { jokerCount: finalJokerCount });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/games/${gameCode}`] });
