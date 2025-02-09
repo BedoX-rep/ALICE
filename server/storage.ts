@@ -107,19 +107,38 @@ export class MemStorage implements IStorage {
     const game = await this.getGame(gameId);
     if (!game) return;
 
-    // Assign random roles to all players
     const players = await this.getPlayers(gameId);
-    const roles = [...ROLES];
-    for (const player of players) {
-      const randomIndex = Math.floor(Math.random() * roles.length);
-      const role = roles.splice(randomIndex, 1)[0];
+    const playerCount = players.length;
 
-      // If this player gets the joker, assign a random disguise
+    // Create array of roles based on joker count
+    const nonJokerRoles: Role[] = ["hearts", "diamonds", "rectangle"];
+    let roles: Role[] = [];
+
+    // Add jokers based on joker count
+    for (let i = 0; i < game.jokerCount; i++) {
+      roles.push("joker");
+    }
+
+    // Fill remaining slots with random non-joker roles
+    while (roles.length < playerCount) {
+      const randomRole = nonJokerRoles[Math.floor(Math.random() * nonJokerRoles.length)];
+      roles.push(randomRole);
+    }
+
+    // Shuffle roles
+    for (let i = roles.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [roles[i], roles[j]] = [roles[j], roles[i]];
+    }
+
+    // Assign roles to players
+    for (let i = 0; i < players.length; i++) {
+      const role = roles[i];
       const disguisedAs = role === "joker" 
         ? DISGUISE_ROLES[Math.floor(Math.random() * DISGUISE_ROLES.length)]
         : null;
 
-      this.players.set(player.id, { ...player, role, disguisedAs });
+      this.players.set(players[i].id, { ...players[i], role, disguisedAs });
     }
 
     // Mark game as started
