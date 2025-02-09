@@ -6,8 +6,56 @@ import { z } from "zod";
 
 export function registerRoutes(app: Express): Server {
   app.post("/api/games", async (req, res) => {
-    const game = await storage.createGame();
+    const game = await storage.createGame(req.body.password);
     res.json(game);
+  });
+
+  app.get("/api/games", async (req, res) => {
+    const games = await storage.getGames();
+    res.json(games);
+  });
+
+  app.post("/api/games/:code/verify-password", async (req, res) => {
+    const game = await storage.getGameByCode(req.params.code);
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+    if (game.password !== req.body.password) {
+      return res.status(403).json({ message: "Invalid password" });
+    }
+    res.json({ success: true });
+  });
+
+  app.post("/api/games/:code/kick", async (req, res) => {
+    const game = await storage.getGameByCode(req.params.code);
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+    await storage.removePlayer(game.id, req.body.playerId);
+    res.json({ success: true });
+  });
+
+  app.get("/api/games/:code/messages", async (req, res) => {
+    const game = await storage.getGameByCode(req.params.code);
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+    const messages = await storage.getMessages(game.id);
+    res.json(messages);
+  });
+
+  app.post("/api/games/:code/messages", async (req, res) => {
+    const game = await storage.getGameByCode(req.params.code);
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+    const message = await storage.addMessage(game.id, {
+      content: req.body.content,
+      playerId: req.body.playerId,
+      toPlayerId: req.body.toPlayerId,
+      isPrivate: !!req.body.toPlayerId
+    });
+    res.json(message);
   });
 
   app.get("/api/games/:code", async (req, res) => {

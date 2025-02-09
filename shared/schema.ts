@@ -9,6 +9,17 @@ export const games = pgTable("games", {
   code: text("code").notNull().unique(),
   started: boolean("started").notNull().default(false),
   jokerCount: integer("joker_count").notNull().default(1),
+  password: text("password"),
+});
+
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  gameId: integer("game_id").notNull(),
+  playerId: integer("player_id").notNull(),
+  content: text("content").notNull(),
+  isPrivate: boolean("is_private").notNull().default(false),
+  toPlayerId: integer("to_player_id"),
+  createdAt: text("created_at").notNull(),
 });
 
 export const players = pgTable("players", {

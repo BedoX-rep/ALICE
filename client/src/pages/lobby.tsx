@@ -120,7 +120,16 @@ export default function Lobby() {
           <PlayerList 
             players={players}
             currentPlayerId={currentPlayer.id}
+            onKick={isCreator ? (playerId) => kickPlayer.mutate(playerId) : undefined}
           />
+
+          <div className="mt-4">
+            <Chat
+              gameCode={gameCode}
+              players={players}
+              currentPlayer={currentPlayer}
+            />
+          </div>
 
           {isCreator && (
             <div className="flex gap-4 mt-6">
