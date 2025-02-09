@@ -35,6 +35,7 @@ export default function Lobby() {
       await apiRequest("POST", `/api/games/${gameCode}/start`);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/games/${gameCode}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/games/${gameCode}/players`] });
     }
   });
