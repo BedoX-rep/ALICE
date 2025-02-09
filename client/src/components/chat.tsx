@@ -16,7 +16,7 @@ export default function Chat({ gameCode, players }: ChatProps) {
   const [message, setMessage] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
 
-  const { data: messages = [] } = useQuery({
+  const { data: messages = [] as any[] } = useQuery({
     queryKey: [`/api/games/${gameCode}/messages`],
     queryFn: () => apiRequest("GET", `/api/games/${gameCode}/messages`),
     refetchInterval: 1000
