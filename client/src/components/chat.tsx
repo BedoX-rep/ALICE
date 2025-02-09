@@ -51,17 +51,17 @@ export default function Chat({ gameCode, players }: ChatProps) {
   };
 
   const formatMessage = (msg: any) => {
-    const sender = players.find(p => p.id === msg.playerId);
-    const recipient = players.find(p => p.id === msg.toPlayerId);
+    const sender = players.find(p => p.id === msg.playerId)?.name || 'Unknown';
+    const recipient = players.find(p => p.id === msg.toPlayerId)?.name || 'Unknown';
     
     if (msg.isPrivate) {
       if (msg.playerId === currentPlayer?.id) {
-        return `To '${recipient?.name}': "${msg.content}"`;
+        return `To '${recipient}': "${msg.content}"`;
       } else {
-        return `From '${sender?.name}': "${msg.content}"`;
+        return `From '${sender}': "${msg.content}"`;
       }
     }
-    return `${sender?.name}: ${msg.content}`;
+    return `${sender}: ${msg.content}`;
   };
 
   return (
