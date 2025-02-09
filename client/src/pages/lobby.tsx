@@ -53,6 +53,20 @@ export default function Lobby() {
     }
   });
 
+  const stopGame = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", `/api/games/${gameCode}/stop`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/games/${gameCode}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/games/${gameCode}/players`] });
+      toast({
+        title: "Game Stopped",
+        description: "You can now start a new game"
+      });
+    }
+  });
+
   // Auto-join game for creator
   useEffect(() => {
     if (game && deviceId && (!players || !players.find(p => p.deviceId === deviceId))) {
@@ -108,13 +122,23 @@ export default function Lobby() {
               )}
 
               {game.started && (
-                <Button 
-                  className="flex-1"
-                  onClick={() => nextRound.mutate()}
-                  disabled={nextRound.isPending}
-                >
-                  {nextRound.isPending ? "Starting Next Round..." : "Next Round"}
-                </Button>
+                <>
+                  <Button 
+                    className="flex-1"
+                    onClick={() => nextRound.mutate()}
+                    disabled={nextRound.isPending}
+                  >
+                    {nextRound.isPending ? "Starting Next Round..." : "Next Round"}
+                  </Button>
+                  <Button 
+                    className="flex-1"
+                    variant="destructive"
+                    onClick={() => stopGame.mutate()}
+                    disabled={stopGame.isPending}
+                  >
+                    {stopGame.isPending ? "Stopping Game..." : "Stop Game"}
+                  </Button>
+                </>
               )}
             </div>
           )}

@@ -88,6 +88,12 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async stopGame(gameId: number): Promise<void> {
+    const game = await this.getGame(gameId);
+    if (!game) return;
+    this.games.set(gameId, { ...game, started: false });
+  }
+
   async startGame(gameId: number): Promise<void> {
     const game = await this.getGame(gameId);
     if (!game) return;

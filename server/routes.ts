@@ -87,6 +87,16 @@ export function registerRoutes(app: Express): Server {
     res.json({ success: true });
   });
 
+  app.post("/api/games/:code/stop", async (req, res) => {
+    const game = await storage.getGameByCode(req.params.code);
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+
+    await storage.stopGame(game.id);
+    res.json({ success: true });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
