@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import Chat from "@/components/chat";
-import Chat from "@/components/chat";
 
 export default function Lobby() {
   const [location, setLocation] = useLocation();
