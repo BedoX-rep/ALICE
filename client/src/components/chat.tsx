@@ -16,11 +16,17 @@ export default function Chat({ gameCode, players }: ChatProps) {
   const [message, setMessage] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
 
-  const { data: messages = [] as any[] } = useQuery({
+  const { data: response } = useQuery({
     queryKey: [`/api/games/${gameCode}/messages`],
-    queryFn: () => apiRequest("GET", `/api/games/${gameCode}/messages`),
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/games/${gameCode}/messages`);
+      const data = await res.json();
+      return data || [];
+    },
     refetchInterval: 1000
   });
+  
+  const messages = Array.isArray(response) ? response : [];
 
   const sendMessage = useMutation({
     mutationFn: async () => {
