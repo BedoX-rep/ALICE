@@ -1,14 +1,12 @@
 import { nanoid } from "nanoid";
 import { type Game, type InsertGame, type Player, type InsertPlayer, type Role } from "@shared/schema";
 
-function generateRoles(jokerCount: number): Role[] {
-  const nonJokerRoles: Role[] = [
-    "hearts", "hearts", "hearts",
-    "diamonds", "diamonds", "diamonds",
-    "rectangle", "rectangle", "rectangle"
-  ];
-  return [...nonJokerRoles, ...Array(jokerCount).fill("joker")];
-}
+const ROLES: Role[] = [
+  "hearts", "hearts", "hearts",
+  "diamonds", "diamonds", "diamonds",
+  "rectangle", "rectangle", "rectangle",
+  "joker", "joker", "joker"
+];
 
 const DISGUISE_ROLES: Role[] = ["hearts", "diamonds", "rectangle"]; // Joker can only disguise as these
 
@@ -36,13 +34,12 @@ export class MemStorage implements IStorage {
     this.currentPlayerId = 1;
   }
 
-  async createGame(jokerCount: number = 3): Promise<Game> {
+  async createGame(): Promise<Game> {
     const id = this.currentGameId++;
     const game: Game = {
       id,
       code: nanoid(6).toUpperCase(),
-      started: false,
-      jokerCount
+      started: false
     };
     this.games.set(id, game);
     return game;
@@ -103,8 +100,7 @@ export class MemStorage implements IStorage {
 
     // Assign random roles to all players
     const players = await this.getPlayers(gameId);
-    if (!game) return;
-    const roles = generateRoles(game.jokerCount);
+    const roles = [...ROLES];
     for (const player of players) {
       const randomIndex = Math.floor(Math.random() * roles.length);
       const role = roles.splice(randomIndex, 1)[0];
