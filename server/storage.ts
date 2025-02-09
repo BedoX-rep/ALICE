@@ -24,14 +24,43 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private games: Map<number, Game>;
   private players: Map<number, Player>;
+  private messages: Map<number, any[]>;
   private currentGameId: number;
   private currentPlayerId: number;
+  private currentMessageId: number;
 
   constructor() {
     this.games = new Map();
     this.players = new Map();
+    this.messages = new Map();
     this.currentGameId = 1;
     this.currentPlayerId = 1;
+    this.currentMessageId = 1;
+  }
+
+  async getMessages(gameId: number) {
+    return Array.from(this.messages.values())
+      .filter(m => m.gameId === gameId)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  }
+
+  async addMessage(gameId: number, { content, playerId, toPlayerId, isPrivate }: any) {
+    const id = this.currentMessageId++;
+    const message = {
+      id,
+      gameId,
+      content,
+      playerId,
+      toPlayerId,
+      isPrivate,
+      createdAt: new Date().toISOString()
+    };
+    
+    if (!this.messages.has(id)) {
+      this.messages.set(id, message);
+    }
+    
+    return message;
   }
 
   async createGame(): Promise<Game> {
