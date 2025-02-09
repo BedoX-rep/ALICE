@@ -6,7 +6,8 @@ import { z } from "zod";
 
 export function registerRoutes(app: Express): Server {
   app.post("/api/games", async (req, res) => {
-    const game = await storage.createGame();
+    const jokerCount = Math.min(5, Math.max(1, req.body.jokerCount || 3));
+    const game = await storage.createGame(jokerCount);
     res.json(game);
   });
 

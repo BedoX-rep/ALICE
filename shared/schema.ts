@@ -8,6 +8,7 @@ export const games = pgTable("games", {
   id: serial("id").primaryKey(),
   code: text("code").notNull().unique(),
   started: boolean("started").notNull().default(false),
+  jokerCount: integer("joker_count").notNull().default(3),
 });
 
 export const players = pgTable("players", {
